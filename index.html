@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>그린플레이트 (Green Plate) - 잔반 제로 챌린지</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- Google Fonts: Pretendard alternative (Inter & Noto Sans KR) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              50: '#f0fdf4',
+              100: '#dcfce7',
+              500: '#22c55e',
+              600: '#16a34a',
+              700: '#15803d',
+              800: '#166534',
+            }
+          },
+          fontFamily: {
+            sans: ['Noto Sans KR', 'sans-serif'],
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    /* Custom Scrollbar for smooth visual feel */
+    ::-webkit-scrollbar {
+      width: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #f1f1f1;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #888;
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #555;
+    }
+    .badge-glow {
+      box-shadow: 0 0 15px rgba(34, 197, 94, 0.4);
+    }
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-800 font-sans min-h-screen flex flex-col justify-between antialiased">
+
+  <!-- Top Navigation Header -->
+  <header class="bg-white border-b border-slate-200 sticky top-0 z-50">
+    <div class="max-w-md mx-auto px-4 py-3 flex items-center justify-between">
+      <div class="flex items-center space-x-2">
+        <div class="w-9 h-9 rounded-xl bg-brand-500 flex items-center justify-center text-white shadow-md">
+          <i class="fa-solid font-bold fa-leaf text-lg"></i>
+        </div>
+        <div>
+          <h1 class="font-bold text-slate-900 text-lg leading-tight">그린플레이트</h1>
+          <p class="text-[10px] text-brand-600 font-medium">잔반 제로 & 온실가스 다이어트</p>
+        </div>
+      </div>
+      <!-- User Profile Badge -->
+      <div class="flex items-center space-x-2 bg-slate-100 px-3 py-1.5 rounded-full">
+        <i class="fa-solid fa-user-graduate text-brand-600 text-sm"></i>
+        <span id="userLevelBadge" class="text-xs font-semibold text-slate-700">🌱 에코 새싹</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content Container (Mobile First Layout) -->
+  <main class="max-w-md mx-auto w-full px-4 py-5 space-y-5 flex-grow">
+
+    <!-- Today's Impact Dashboard -->
+    <section class="bg-gradient-to-br from-brand-600 to-brand-800 rounded-2xl p-5 text-white shadow-lg relative overflow-hidden">
+      <!-- Background Decorative Circles -->
+      <div class="absolute -right-6 -bottom-6 w-24 h-24 bg-white/10 rounded-full blur-xl"></div>
+      <div class="absolute -left-6 -top-6 w-20 h-20 bg-white/10 rounded-full blur-lg"></div>
+
+      <div class="flex justify-between items-start mb-3 relative z-10">
+        <div>
+          <span class="text-xs font-medium text-brand-100 bg-white/10 px-2.5 py-1 rounded-full">실시간 나의 누적 성과</span>
+          <h2 class="text-2xl font-extrabold mt-1">지구 살리기 성공 중! 🌍</h2>
+        </div>
+        <button onclick="resetData()" title="데이터 초기화" class="text-white/70 hover:text-white text-xs bg-black/10 px-2 py-1 rounded-md transition">
+          <i class="fa-solid fa-rotate-right"></i>
+        </button>
+      </div>
+
+      <!-- Stats Grid -->
+      <div class="grid grid-cols-3 gap-2 mt-4 relative z-10">
+        <div class="bg-white/10 backdrop-blur-md rounded-xl p-3 text-center border border-white/10">
+          <p class="text-[11px] text-brand-100">인증 횟수</p>
+          <p class="text-xl font-bold mt-0.5"><span id="statCount">0</span><span class="text-xs font-normal">회</span></p>
+        </div>
+        <div class="bg-white/10 backdrop-blur-md rounded-xl p-3 text-center border border-white/10">
+          <p class="text-[11px] text-brand-100">CO₂ 감축</p>
+          <p class="text-xl font-bold mt-0.5"><span id="statCo2">0.0</span><span class="text-xs font-normal">kg</span></p>
+        </div>
+        <div class="bg-white/10 backdrop-blur-md rounded-xl p-3 text-center border border-white/10">
+          <p class="text-[11px] text-brand-100">획득 포인트</p>
+          <p class="text-xl font-bold mt-0.5"><span id="statPoints">0</span><span class="text-xs font-normal">p</span></p>
+        </div>
+      </div>
+
+      <!-- Progress Bar for Next Level -->
+      <div class="mt-4 pt-3 border-t border-white/10 relative z-10">
+        <div class="flex justify-between text-xs text-brand-100 mb-1">
+          <span>다음 등급까지</span>
+          <span id="levelProgressText">0 / 3 회</span>
+        </div>
+        <div class="w-full bg-black/20 rounded-full h-2 overflow-hidden">
+          <div id="levelProgressBar" class="bg-brand-100 h-2 rounded-full transition-all duration-500" style="width: 0%"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Meal Verification Form Card -->
+    <section class="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-sm space-y-4">
+      <div class="flex items-center space-x-2 border-b border-slate-100 pb-3">
+        <i class="fa-solid fa-camera text-brand-600 text-lg"></i>
+        <h3 class="font-bold text-slate-900 text-base">오늘의 급식 인증하기</h3>
+      </div>
+
+      <form id="verifyForm" onsubmit="handleVerification(event)" class="space-y-4">
+        <!-- Meal Type Selector -->
+        <div>
+          <label class="block text-xs font-semibold text-slate-600 mb-1.5">급식 구분</label>
+          <div class="grid grid-cols-2 gap-2">
+            <button type="button" id="btnLunch" onclick="selectMealType('중식')" 
+              class="py-2.5 px-3 rounded-xl border border-brand-500 bg-brand-50 text-brand-700 font-semibold text-sm flex items-center justify-center space-x-2 transition">
+              <i class="fa-solid fa-sun text-amber-500"></i>
+              <span>점심 급식</span>
+            </button>
+            <button type="button" id="btnDinner" onclick="selectMealType('석식')" 
+              class="py-2.5 px-3 rounded-xl border border-slate-200 bg-white text-slate-600 font-semibold text-sm flex items-center justify-center space-x-2 transition hover:bg-slate-50">
+              <i class="fa-solid fa-moon text-indigo-400"></i>
+              <span>저녁 급식</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Image Upload Dropzone / Preview -->
+        <div>
+          <label class="block text-xs font-semibold text-slate-600 mb-1.5">잔반 없는 클린 식판 사진</label>
+          
+          <div id="dropzone" class="border-2 border-dashed border-slate-300 rounded-xl p-4 text-center hover:border-brand-500 transition cursor-pointer bg-slate-50 relative">
+            <input type="file" id="imageInput" accept="image/*" class="hidden" onchange="handleFileSelect(event)" />
+            
+            <!-- Default Placeholder View -->
+            <div id="uploadPlaceholder" class="space-y-2 py-2">
+              <div class="w-12 h-12 rounded-full bg-brand-100 text-brand-600 mx-auto flex items-center justify-center text-xl">
+                <i class="fa-solid fa-cloud-arrow-up"></i>
+              </div>
+              <div>
+                <p class="text-sm font-semibold text-slate-700">여기를 터치하여 사진을 등록하세요</p>
+                <p class="text-xs text-slate-400 mt-0.5">식판 전체가 잘 보이도록 촬영해 주세요</p>
+              </div>
+            </div>
+
+            <!-- Image Preview View -->
+            <div id="previewContainer" class="hidden relative">
+              <img id="imagePreview" src="" alt="식판 사진 미리보기" class="w-full h-48 object-cover rounded-lg shadow-inner" />
+              <button type="button" onclick="removeImage(event)" class="absolute top-2 right-2 bg-slate-900/70 text-white w-7 h-7 rounded-full flex items-center justify-center hover:bg-slate-900 transition">
+                <i class="fa-solid fa-xmark text-sm"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- AI Verification Badge Mockup -->
+        <div class="flex items-center space-x-2 text-xs text-slate-500 bg-slate-100 p-2.5 rounded-lg">
+          <i class="fa-solid fa-robot text-brand-600 text-sm"></i>
+          <span>인공지능이 잔반 여부를 자동으로 감지하고 인증합니다.</span>
+        </div>
+
+        <!-- Submit Button -->
+        <button type="submit" id="submitBtn" class="w-full py-3.5 bg-brand-500 hover:bg-brand-600 active:bg-brand-700 text-white font-bold rounded-xl shadow-md transition-all duration-200 flex items-center justify-center space-x-2 text-base">
+          <i class="fa-solid fa-check"></i>
+          <span>잔반 제로 인증완료하기</span>
+        </button>
+      </form>
+    </section>
+
+    <!-- Recent Logs & School Leaderboard Section -->
+    <section class="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-sm space-y-4">
+      <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+        <h3 class="font-bold text-slate-900 text-base flex items-center space-x-2">
+          <i class="fa-solid fa-list-check text-brand-600"></i>
+          <span>나의 최근 인증 기록</span>
+        </h3>
+        <span class="text-xs text-slate-400" id="logCount">총 0개</span>
+      </div>
+
+      <!-- Log List -->
+      <div id="logList" class="space-y-3">
+        <!-- Empty state placeholder -->
+        <div id="emptyLog" class="text-center py-6 text-slate-400">
+          <i class="fa-regular fa-folder-open text-3xl mb-2 block"></i>
+          <p class="text-xs">아직 인증된 기록이 없어요.<br>첫 잔반 제로 인증에 도전해보세요!</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Privacy & Ethics Notice Box (Mandatory ethical element) -->
+    <section class="bg-slate-100 rounded-xl p-4 border border-slate-200 text-xs text-slate-500 space-y-1.5">
+      <div class="flex items-center space-x-1.5 text-slate-700 font-semibold">
+        <i class="fa-solid fa-shield-halved text-brand-600"></i>
+        <span>개인정보 보호 및 윤리적 사용 안내</span>
+      </div>
+      <p class="leading-relaxed">
+        • 업로드된 식판 이미지는 **잔반 인식 목적 이외에 절대 사용되지 않습니다.**<br>
+        • 얼굴이나 인적 사항은 자동 비식별화 처리되며, 어떠한 타인에게도 공개되지 않으니 안심하세요.
+      </p>
+    </section>
+
+  </main>
+
+  <!-- Notification Toast Modal -->
+  <div id="toast" class="fixed bottom-6 left-1/2 transform -translate-x-1/2 bg-slate-900 text-white px-5 py-3 rounded-full shadow-2xl flex items-center space-x-3 text-sm z-50 transition-all duration-300 opacity-0 pointer-events-none translate-y-4">
+    <i id="toastIcon" class="fa-solid fa-circle-check text-brand-400 text-lg"></i>
+    <span id="toastMessage">인증에 성공했습니다!</span>
+  </div>
+
+  <!-- Footer -->
+  <footer class="text-center py-4 text-xs text-slate-400 border-t border-slate-200 bg-white">
+    <p>© 2026 그린플레이트 (Green Plate) - Eco Lunch Challenge</p>
+  </footer>
+
+  <!-- Application Logic JS -->
+  <script>
+    // State management
+    let state = {
+      mealType: '중식',
+      selectedImage: null,
+      logs: [],
+      totalCount: 0,
+      totalCo2: 0,
+      totalPoints: 0
+    };
+
+    // DOM Elements
+    const dropzone = document.getElementById('dropzone');
+    const imageInput = document.getElementById('imageInput');
+    const uploadPlaceholder = document.getElementById('uploadPlaceholder');
+    const previewContainer = document.getElementById('previewContainer');
+    const imagePreview = document.getElementById('imagePreview');
+
+    // Click dropzone to open file picker
+    dropzone.addEventListener('click', (e) => {
+      if (e.target.closest('button')) return; // ignore delete button click
+      imageInput.click();
+    });
+
+    // Select Meal Type
+    function selectMealType(type) {
+      state.mealType = type;
+      const btnLunch = document.getElementById('btnLunch');
+      const btnDinner = document.getElementById('btnDinner');
+
+      if (type === '중식') {
+        btnLunch.className = "py-2.5 px-3 rounded-xl border border-brand-500 bg-brand-50 text-brand-700 font-semibold text-sm flex items-center justify-center space-x-2 transition";
+        btnDinner.className = "py-2.5 px-3 rounded-xl border border-slate-200 bg-white text-slate-600 font-semibold text-sm flex items-center justify-center space-x-2 transition hover:bg-slate-50";
+      } else {
+        btnDinner.className = "py-2.5 px-3 rounded-xl border border-brand-500 bg-brand-50 text-brand-700 font-semibold text-sm flex items-center justify-center space-x-2 transition";
+        btnLunch.className = "py-2.5 px-3 rounded-xl border border-slate-200 bg-white text-slate-600 font-semibold text-sm flex items-center justify-center space-x-2 transition hover:bg-slate-50";
+      }
+    }
+
+    // Handle File Selection
+    function handleFileSelect(e) {
+      const file = e.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = function(evt) {
+          state.selectedImage = evt.target.result;
+          imagePreview.src = evt.target.result;
+          uploadPlaceholder.classList.add('hidden');
+          previewContainer.classList.remove('hidden');
+        };
+        reader.readAsDataURL(file);
+      }
+    }
+
+    // Remove Selected Image
+    function removeImage(e) {
+      e.stopPropagation();
+      state.selectedImage = null;
+      imageInput.value = '';
+      uploadPlaceholder.classList.remove('hidden');
+      previewContainer.classList.add('hidden');
+    }
+
+    // Handle Form Submission
+    function handleVerification(e) {
+      e.preventDefault();
+
+      if (!state.selectedImage) {
+        showToast('📸 깨끗한 식판 사진을 등록해주세요!', 'error');
+        return;
+      }
+
+      // Simulate AI Verification & Update Stats
+      const co2Reduction = 0.36; // 1회 잔반 감소당 약 0.36kg CO2 감축
+      const pointsEarned = 100;
+
+      state.totalCount += 1;
+      state.totalCo2 = parseFloat((state.totalCo2 + co2Reduction).toFixed(2));
+      state.totalPoints += pointsEarned;
+
+      // Add Log Entry
+      const newLog = {
+        id: Date.now(),
+        mealType: state.mealType,
+        time: new Date().toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' }),
+        date: new Date().toLocaleDateString('ko-KR', { month: 'short', day: 'numeric' }),
+        co2: co2Reduction,
+        points: pointsEarned,
+        image: state.selectedImage
+      };
+
+      state.logs.unshift(newLog);
+
+      // Render UI Updates
+      updateDashboard();
+      renderLogs();
+      
+      // Reset Input Form
+      removeImage(e);
+      showToast('🎉 잔반 제로 인증 완료! 온실가스 0.36kg 감축!');
+    }
+
+    // Update Dashboard Values & Level Badges
+    function updateDashboard() {
+      document.getElementById('statCount').innerText = state.totalCount;
+      document.getElementById('statCo2').innerText = state.totalCo2.toFixed(1);
+      document.getElementById('statPoints').innerText = state.totalPoints;
+
+      // Level Progress Logic
+      const levelProgressText = document.getElementById('levelProgressText');
+      const levelProgressBar = document.getElementById('levelProgressBar');
+      const userLevelBadge = document.getElementById('userLevelBadge');
+
+      if (state.totalCount < 3) {
+        userLevelBadge.innerText = '🌱 에코 새싹';
+        levelProgressText.innerText = `${state.totalCount} / 3 회`;
+        levelProgressBar.style.width = `${(state.totalCount / 3) * 100}%`;
+      } else if (state.totalCount < 7) {
+        userLevelBadge.innerText = '🌿 환경 수호자';
+        levelProgressText.innerText = `${state.totalCount} / 7 회`;
+        levelProgressBar.style.width = `${((state.totalCount - 3) / 4) * 100}%`;
+      } else {
+        userLevelBadge.innerText = '🌳 지구 영웅';
+        levelProgressText.innerText = `최고 등급 달성! 🔥`;
+        levelProgressBar.style.width = `100%`;
+      }
+
+      // Save to localStorage
+      saveState();
+    }
+
+    // Render Recent Logs List
+    function renderLogs() {
+      const logList = document.getElementById('logList');
+      const emptyLog = document.getElementById('emptyLog');
+      const logCount = document.getElementById('logCount');
+
+      logCount.innerText = `총 ${state.logs.length}개`;
+
+      if (state.logs.length === 0) {
+        logList.appendChild(emptyLog);
+        return;
+      }
+
+      logList.innerHTML = '';
+      state.logs.forEach(log => {
+        const item = document.createElement('div');
+        item.className = "flex items-center justify-between p-3 bg-slate-50 rounded-xl border border-slate-100 hover:bg-slate-100 transition";
+        item.innerHTML = `
+          <div class="flex items-center space-x-3">
+            <img src="${log.image}" class="w-12 h-12 object-cover rounded-lg border border-slate-200" alt="식판 사진" />
+            <div>
+              <div class="flex items-center space-x-1.5">
+                <span class="text-xs font-bold text-slate-800">${log.mealType}</span>
+                <span class="text-[10px] text-slate-400">${log.date} ${log.time}</span>
+              </div>
+              <p class="text-xs text-brand-600 font-semibold mt-0.5">CO₂ ${log.co2}kg 감축 성공!</p>
+            </div>
+          </div>
+          <span class="text-xs font-bold text-slate-600 bg-white px-2.5 py-1 rounded-full border border-slate-200">
+            +${log.points}p
+          </span>
+        `;
+        logList.appendChild(item);
+      });
+    }
+
+    // Custom Toast Notification System (replaces alert)
+    function showToast(message, type = 'success') {
+      const toast = document.getElementById('toast');
+      const toastMessage = document.getElementById('toastMessage');
+      const toastIcon = document.getElementById('toastIcon');
+
+      toastMessage.innerText = message;
+      if (type === 'error') {
+        toastIcon.className = 'fa-solid fa-circle-exclamation text-rose-400 text-lg';
+      } else {
+        toastIcon.className = 'fa-solid fa-circle-check text-brand-400 text-lg';
+      }
+
+      toast.classList.remove('opacity-0', 'pointer-events-none', 'translate-y-4');
+      toast.classList.add('opacity-100', 'translate-y-0');
+
+      setTimeout(() => {
+        toast.classList.remove('opacity-100', 'translate-y-0');
+        toast.classList.add('opacity-0', 'pointer-events-none', 'translate-y-4');
+      }, 3000);
+    }
+
+    // Local Storage Helper Functions
+    function saveState() {
+      localStorage.setItem('greenPlateState', JSON.stringify({
+        totalCount: state.totalCount,
+        totalCo2: state.totalCo2,
+        totalPoints: state.totalPoints,
+        logs: state.logs.slice(0, 10) // store latest 10 logs
+      }));
+    }
+
+    function loadState() {
+      const saved = localStorage.getItem('greenPlateState');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        state.totalCount = parsed.totalCount || 0;
+        state.totalCo2 = parsed.totalCo2 || 0;
+        state.totalPoints = parsed.totalPoints || 0;
+        state.logs = parsed.logs || [];
+        updateDashboard();
+        renderLogs();
+      }
+    }
+
+    function resetData() {
+      if (confirm('기록을 모두 초기화하시겠습니까?')) {
+        localStorage.removeItem('greenPlateState');
+        state = {
+          mealType: '중식',
+          selectedImage: null,
+          logs: [],
+          totalCount: 0,
+          totalCo2: 0,
+          totalPoints: 0
+        };
+        updateDashboard();
+        renderLogs();
+        showToast('데이터가 초기화되었습니다.');
+      }
+    }
+
+    // Initialize Page
+    window.onload = function() {
+      loadState();
+    };
+  </script>
+</body>
+</html>
