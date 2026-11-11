@@ -1,0 +1,581 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>에코히어로 (EcoHero) - SDGs 기후 탐험대</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- Google Fonts (Noto Sans KR) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            sdg: {
+              main: '#27ae60',
+              dark: '#1e824c',
+              light: '#e8f8f5',
+              accent: '#f39c12',
+              blue: '#2980b9'
+            }
+          },
+          fontFamily: {
+            sans: ['Noto Sans KR', 'sans-serif'],
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    /* Custom Scrollbar styling */
+    ::-webkit-scrollbar {
+      width: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #f1f5f9;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #cbd5e1;
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #94a3b8;
+    }
+    .pulse-glow {
+      box-shadow: 0 0 15px rgba(39, 174, 96, 0.4);
+    }
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-800 font-sans min-h-screen flex flex-col justify-between antialiased">
+
+  <!-- Header Navigation -->
+  <header class="bg-white border-b border-slate-200 sticky top-0 z-50">
+    <div class="max-w-md mx-auto px-4 py-3 flex items-center justify-between">
+      <div class="flex items-center space-x-2.5">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-sdg-main to-teal-500 flex items-center justify-center text-white shadow-md">
+          <i class="fa-solid fa-earth-americas text-xl"></i>
+        </div>
+        <div>
+          <h1 class="font-bold text-slate-900 text-lg leading-tight">에코히어로</h1>
+          <p class="text-[11px] text-sdg-main font-semibold">SDGs 12 & 13 기후 행동 플랫폼</p>
+        </div>
+      </div>
+      <!-- User Level Badge -->
+      <div class="flex items-center space-x-1.5 bg-sdg-light px-3 py-1.5 rounded-full border border-emerald-200">
+        <i class="fa-solid fa-seedling text-sdg-main text-sm"></i>
+        <span id="badgeName" class="text-xs font-bold text-emerald-800">지구 가디언 Level 1</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main View Container -->
+  <main class="max-w-md mx-auto w-full px-4 py-5 space-y-5 flex-grow">
+
+    <!-- SDGs Banner & Impact Summary -->
+    <section class="bg-gradient-to-br from-emerald-600 via-teal-700 to-slate-800 rounded-2xl p-5 text-white shadow-lg relative overflow-hidden">
+      <div class="absolute -right-6 -bottom-6 w-28 h-28 bg-white/10 rounded-full blur-xl"></div>
+      <div class="flex justify-between items-start mb-3 relative z-10">
+        <div>
+          <div class="flex space-x-1.5 mb-1.5">
+            <span class="text-[10px] font-bold bg-amber-500 text-white px-2 py-0.5 rounded-md">SDG 12</span>
+            <span class="text-[10px] font-bold bg-sky-500 text-white px-2 py-0.5 rounded-md">SDG 13</span>
+          </div>
+          <h2 class="text-xl font-extrabold">오늘 나의 기후 행동 🌍</h2>
+        </div>
+        <button onclick="resetData()" title="데이터 초기화" class="text-white/70 hover:text-white text-xs bg-black/20 px-2 py-1 rounded-md transition">
+          <i class="fa-solid fa-arrows-rotate"></i>
+        </button>
+      </div>
+
+      <!-- Dashboard Stats Grid -->
+      <div class="grid grid-cols-3 gap-2 mt-4 relative z-10">
+        <div class="bg-white/10 backdrop-blur-md rounded-xl p-3 text-center border border-white/15">
+          <p class="text-[11px] text-emerald-100">실천 횟수</p>
+          <p class="text-xl font-extrabold mt-0.5"><span id="statCount">0</span><span class="text-xs font-normal">회</span></p>
+        </div>
+        <div class="bg-white/10 backdrop-blur-md rounded-xl p-3 text-center border border-white/15">
+          <p class="text-[11px] text-emerald-100">탄소 감축</p>
+          <p class="text-xl font-extrabold mt-0.5"><span id="statCo2">0.0</span><span class="text-xs font-normal">kg</span></p>
+        </div>
+        <div class="bg-white/10 backdrop-blur-md rounded-xl p-3 text-center border border-white/15">
+          <p class="text-[11px] text-emerald-100">에코 포인트</p>
+          <p class="text-xl font-extrabold mt-0.5"><span id="statPoints">0</span><span class="text-xs font-normal">p</span></p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Action Verification Form -->
+    <section class="bg-white rounded-2xl p-5 border border-slate-200/90 shadow-sm space-y-4">
+      <div class="flex items-center space-x-2 border-b border-slate-100 pb-3">
+        <i class="fa-solid fa-camera-retro text-sdg-main text-lg"></i>
+        <h3 class="font-bold text-slate-900 text-base">친환경 실천 미션 인증</h3>
+      </div>
+
+      <form id="actionForm" onsubmit="handleActionSubmit(event)" class="space-y-4">
+        <!-- Mission Type Selection -->
+        <div>
+          <label class="block text-xs font-semibold text-slate-600 mb-1.5">실천한 SDGs 미션 선택</label>
+          <select id="missionSelect" class="w-full py-2.5 px-3 rounded-xl border border-slate-300 text-slate-800 font-medium text-sm focus:outline-none focus:ring-2 focus:ring-sdg-main bg-white">
+            <option value="lunch">🥗 학교 급식 잔반 0% 달성 (SDG 12)</option>
+            <option value="tumbler">🥤 텀블러/다회용 컵 사용 (SDG 12)</option>
+            <option value="walk">🚶 도보 및 자전거 이용 (SDG 13)</option>
+            <option value="plug">🔌 안 쓰는 플러그 뽑기 (SDG 13)</option>
+            <option value="recycle">♻️ 분리배출 정밀 실천 (SDG 12)</option>
+          </select>
+        </div>
+
+        <!-- Image Upload Dropzone / Preview -->
+        <div>
+          <label class="block text-xs font-semibold text-slate-600 mb-1.5">실천 인증 사진 첨부</label>
+          
+          <div id="dropzone" class="border-2 border-dashed border-slate-300 rounded-xl p-4 text-center hover:border-sdg-main transition cursor-pointer bg-slate-50 relative">
+            <input type="file" id="imageInput" accept="image/*" class="hidden" onchange="handleFileSelect(event)" />
+            
+            <!-- Default Placeholder View -->
+            <div id="uploadPlaceholder" class="space-y-2 py-2">
+              <div class="w-12 h-12 rounded-full bg-emerald-100 text-sdg-main mx-auto flex items-center justify-center text-xl">
+                <i class="fa-solid fa-cloud-arrow-up"></i>
+              </div>
+              <div>
+                <p class="text-sm font-semibold text-slate-700">인증 사진 등록하기</p>
+                <p class="text-xs text-slate-400 mt-0.5">터치하여 사진을 촬영하거나 업로드하세요</p>
+              </div>
+            </div>
+
+            <!-- Image Preview View -->
+            <div id="previewContainer" class="hidden relative">
+              <img id="imagePreview" src="" alt="인증 사진 미리보기" class="w-full h-48 object-cover rounded-lg shadow-inner" />
+              <button type="button" onclick="removeImage(event)" class="absolute top-2 right-2 bg-slate-900/70 text-white w-7 h-7 rounded-full flex items-center justify-center hover:bg-slate-900 transition">
+                <i class="fa-solid fa-xmark text-sm"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- AI Verification Badge Banner -->
+        <div class="flex items-center space-x-2 text-xs text-slate-500 bg-slate-100 p-2.5 rounded-lg border border-slate-200">
+          <i class="fa-solid fa-robot text-sdg-main text-sm"></i>
+          <span>인공지능(AI)이 인증 이미지의 정밀 분석 및 영향력을 검증합니다.</span>
+        </div>
+
+        <!-- Submit Button -->
+        <button type="submit" id="submitBtn" class="w-full py-3.5 bg-sdg-main hover:bg-sdg-dark active:scale-[0.99] text-white font-bold rounded-xl shadow-md transition-all duration-200 flex items-center justify-center space-x-2 text-base">
+          <i class="fa-solid fa-wand-magic-sparkles"></i>
+          <span>AI 이미지 스캔 & 실천 인증하기</span>
+        </button>
+      </form>
+    </section>
+
+    <!-- AI Analysis Result Modal / Card -->
+    <div id="aiResultCard" class="hidden bg-gradient-to-r from-emerald-50 to-teal-50 border border-emerald-200 rounded-2xl p-5 shadow-sm space-y-3">
+      <div class="flex items-center justify-between border-b border-emerald-200/60 pb-2">
+        <div class="flex items-center space-x-2 text-emerald-800 font-bold text-sm">
+          <i class="fa-solid fa-sparkles text-sdg-main"></i>
+          <span>AI 분석 및 영향력 평가</span>
+        </div>
+        <span class="bg-emerald-600 text-white text-xs font-extrabold px-2.5 py-0.5 rounded-full">인증 성공!</span>
+      </div>
+      <p id="aiFeedbackMessage" class="text-xs text-slate-700 leading-relaxed font-medium">
+        <!-- Dynamic Feedback Message -->
+      </p>
+      <!-- NEW: AI Tip Box -->
+      <div class="bg-white/80 p-3 rounded-xl border border-emerald-100 flex items-start space-x-2.5 mt-2">
+        <i class="fa-solid fa-lightbulb text-amber-500 text-sm mt-0.5"></i>
+        <div>
+          <p class="text-[11px] font-bold text-slate-800">AI 에코 꿀팁 가이드</p>
+          <p id="aiEcoTip" class="text-[11px] text-slate-600 mt-0.5"></p>
+        </div>
+      </div>
+    </div>
+
+    <!-- NEW: AI Quiz & Daily Knowledge Section -->
+    <section class="bg-gradient-to-r from-amber-500 to-orange-500 rounded-2xl p-5 text-white shadow-md relative overflow-hidden flex items-center justify-between">
+      <div class="space-y-1 relative z-10">
+        <div class="inline-flex items-center space-x-1 bg-black/20 px-2 py-0.5 rounded-md text-[10px] font-bold">
+          <i class="fa-solid fa-brain text-amber-200"></i>
+          <span>AI 실시간 퀴즈</span>
+        </div>
+        <h3 class="font-extrabold text-base">SDGs 기후 퀴즈 도전!</h3>
+        <p class="text-xs text-amber-100">퀴즈를 풀고 보너스 +50 에코 포인트를 획득하세요.</p>
+      </div>
+      <button onclick="startAiQuiz()" class="relative z-10 px-4 py-2.5 bg-white text-orange-600 font-bold rounded-xl text-xs hover:bg-amber-50 active:scale-95 transition shadow-sm flex items-center space-x-1.5 whitespace-nowrap">
+        <i class="fa-solid fa-play"></i>
+        <span>퀴즈 풀기</span>
+      </button>
+    </section>
+
+    <!-- Recent History Log -->
+    <section class="bg-white rounded-2xl p-5 border border-slate-200/90 shadow-sm space-y-4">
+      <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+        <h3 class="font-bold text-slate-900 text-base flex items-center space-x-2">
+          <i class="fa-solid fa-clock-rotate-left text-sdg-main"></i>
+          <span>나의 SDGs 실천 타임라인</span>
+        </h3>
+        <span class="text-xs text-slate-400" id="logCount">총 0개</span>
+      </div>
+
+      <!-- Log List -->
+      <div id="logList" class="space-y-3">
+        <div id="emptyLog" class="text-center py-6 text-slate-400">
+          <i class="fa-regular fa-folder-open text-3xl mb-2 block"></i>
+          <p class="text-xs">아직 등록된 실천 기록이 없습니다.<br>첫 번째 기후 행동 미션에 도전해보세요!</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Ethics & Privacy Protection Notice -->
+    <section class="bg-slate-100 rounded-xl p-4 border border-slate-200 text-xs text-slate-500 space-y-1.5">
+      <div class="flex items-center space-x-1.5 text-slate-700 font-semibold">
+        <i class="fa-solid fa-shield-halved text-sdg-main"></i>
+        <span>개인정보 보호 및 프라이버시 준수</span>
+      </div>
+      <p class="leading-relaxed">
+        • 첨부한 인증 사진은 **미션 검증 용도로만 사용되며 외부 서버로 무단 전송되지 않습니다.**<br>
+        • 학생의 인적 사항이나 개인식별정보(얼굴 등)는 절대 수집하거나 저장하지 않습니다.
+      </p>
+    </section>
+
+  </main>
+
+  <!-- Toast Notification Modal -->
+  <div id="toast" class="fixed bottom-6 left-1/2 transform -translate-x-1/2 bg-slate-900 text-white px-5 py-3 rounded-full shadow-2xl flex items-center space-x-3 text-sm z-50 transition-all duration-300 opacity-0 pointer-events-none translate-y-4">
+    <i id="toastIcon" class="fa-solid fa-circle-check text-emerald-400 text-lg"></i>
+    <span id="toastMessage">실천 인증이 완료되었습니다!</span>
+  </div>
+
+  <!-- Loading Modal (AI Processing) -->
+  <div id="loadingModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center z-50 hidden">
+    <div class="bg-white rounded-2xl p-6 max-w-xs w-full mx-4 text-center space-y-4 shadow-2xl">
+      <div class="relative w-16 h-16 mx-auto">
+        <div class="w-16 h-16 border-4 border-emerald-200 border-t-sdg-main rounded-full animate-spin"></div>
+        <div class="absolute inset-0 flex items-center justify-center text-sdg-main">
+          <i class="fa-solid fa-robot text-xl"></i>
+        </div>
+      </div>
+      <div>
+        <h4 id="loadingTitle" class="font-bold text-slate-800 text-base">AI 검증 처리 중...</h4>
+        <p id="loadingDesc" class="text-xs text-slate-500 mt-1">인공지능이 제출된 인증 사진을 정밀 분석하여 탄소 감축 효과를 산출하고 있습니다.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- NEW: AI Quiz Modal Window -->
+  <div id="quizModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center z-50 hidden">
+    <div class="bg-white rounded-2xl p-6 max-w-xs w-full mx-4 space-y-4 shadow-2xl relative">
+      <div class="flex justify-between items-center border-b border-slate-100 pb-2">
+        <span class="text-xs font-bold text-orange-600 bg-orange-100 px-2 py-0.5 rounded">AI Quiz (+50p)</span>
+        <button onclick="closeQuizModal()" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div>
+        <h4 id="quizQuestion" class="font-bold text-slate-800 text-sm leading-snug"></h4>
+      </div>
+      <div id="quizOptions" class="space-y-2">
+        <!-- Dynamic Quiz Option Buttons -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="text-center py-4 text-xs text-slate-400 border-t border-slate-200 bg-white">
+    <p>© 2026 에코히어로 (EcoHero) - SDGs 틴에이저 기후 탐험대</p>
+  </footer>
+
+  <!-- App Script Logic -->
+  <script>
+    let state = {
+      selectedImage: null,
+      logs: [],
+      totalCount: 0,
+      totalCo2: 0,
+      totalPoints: 0
+    };
+
+    const missionMeta = {
+      lunch: { name: '학교 급식 잔반 0%', sdg: 'SDG 12', co2: 0.35, points: 100, tip: '음식물 쓰레기 1kg 감소 시 약 2.5kg의 온실가스가 줄어듭니다!' },
+      tumbler: { name: '텀블러/다회용 컵 사용', sdg: 'SDG 12', co2: 0.20, points: 80, tip: '일회용 컵 대신 텀블러를 30회 이상 쓰면 제작 시 배출된 탄소를 상쇄해요.' },
+      walk: { name: '도보 및 자전거 이용', sdg: 'SDG 13', co2: 0.50, points: 150, tip: '가까운 거리를 걸어가면 승용차 대비 1km당 200g의 CO₂를 절약할 수 있어요.' },
+      plug: { name: '안 쓰는 플러그 뽑기', sdg: 'SDG 13', co2: 0.15, points: 60, tip: '대기 전력을 차단하는 것만으로도 가구당 연간 약 30kg의 탄소가 줄어듭니다.' },
+      recycle: { name: '분리배출 정밀 실천', sdg: 'SDG 12', co2: 0.25, points: 90, tip: '페트병의 라벨을 떼고 찌그러트려 버리면 재활용률이 3배 이상 높아져요.' }
+    };
+
+    // AI Quiz Pool
+    const quizPool = [
+      {
+        q: 'SDG 12(책임 있는 소비와 생산)에 해당하는 대표적인 행동은?',
+        options: ['급식 잔반 남기지 않기', '사용한 전등 켜두기', '일회용품 매일 쓰기'],
+        answer: 0
+      },
+      {
+        q: '온실가스 배출을 줄이기 위한 기후 행동(SDG 13)으로 맞지 않은 것은?',
+        options: ['가까운 거리 걸어가기', '안 쓰는 전자제품 플러그 뽑기', '음식물 쓰레기 아무 데나 버리기'],
+        answer: 2
+      },
+      {
+        q: '텀블러 사용 시 지구 환경에 미치는 긍정적 영향은?',
+        options: ['플라스틱 쓰레기 감소', '해양 오염 가중', '온실가스 급증'],
+        answer: 0
+      }
+    ];
+
+    let currentQuiz = null;
+
+    const dropzone = document.getElementById('dropzone');
+    const imageInput = document.getElementById('imageInput');
+    const uploadPlaceholder = document.getElementById('uploadPlaceholder');
+    const previewContainer = document.getElementById('previewContainer');
+    const imagePreview = document.getElementById('imagePreview');
+
+    dropzone.addEventListener('click', (e) => {
+      if (e.target.closest('button')) return;
+      imageInput.click();
+    });
+
+    function handleFileSelect(e) {
+      const file = e.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = function(event) {
+          state.selectedImage = event.target.result;
+          imagePreview.src = event.target.result;
+          uploadPlaceholder.classList.add('hidden');
+          previewContainer.classList.remove('hidden');
+        };
+        reader.readAsDataURL(file);
+      }
+    }
+
+    function removeImage(e) {
+      if (e) e.stopPropagation();
+      state.selectedImage = null;
+      imageInput.value = '';
+      imagePreview.src = '';
+      uploadPlaceholder.classList.remove('hidden');
+      previewContainer.classList.add('hidden');
+    }
+
+    function handleActionSubmit(e) {
+      e.preventDefault();
+
+      if (!state.selectedImage) {
+        showToast('📸 먼저 미션 실천 사진을 등록해주세요!', 'error');
+        return;
+      }
+
+      const missionType = document.getElementById('missionSelect').value;
+      const missionData = missionMeta[missionType];
+
+      const loadingModal = document.getElementById('loadingModal');
+      document.getElementById('loadingTitle').innerText = 'AI 검증 처리 중...';
+      document.getElementById('loadingDesc').innerText = '인공지능이 제출된 인증 사진을 정밀 분석하여 탄소 감축 효과를 산출하고 있습니다.';
+      
+      const submitBtn = document.getElementById('submitBtn');
+      loadingModal.classList.remove('hidden');
+      submitBtn.disabled = true;
+
+      // Simulate AI Vision Verification & Evaluation
+      setTimeout(() => {
+        loadingModal.classList.add('hidden');
+        submitBtn.disabled = false;
+
+        const aiFeedbacks = [
+          `🎉 완벽해요! AI 분석 결과 [${missionData.name}] 실천이 인정되었습니다. 지구 온실가스 감축에 실질적인 도움이 되었어요!`,
+          `🌟 훌륭한 기후 행동입니다! [${missionData.name}] 인증으로 탄소 발자국이 줄어들어 지속가능한 미래에 한 걸음 더 다가갔습니다.`,
+          `💚 멋진 실천이에요! AI가 정밀하게 검증한 친환경 활동을 통해 에코 포인트가 추가로 적립되었습니다.`
+        ];
+        const randomFeedback = aiFeedbacks[Math.floor(Math.random() * aiFeedbacks.length)];
+
+        document.getElementById('aiFeedbackMessage').innerText = randomFeedback;
+        document.getElementById('aiEcoTip').innerText = missionData.tip;
+        document.getElementById('aiResultCard').classList.remove('hidden');
+
+        state.totalCount += 1;
+        state.totalCo2 = parseFloat((state.totalCo2 + missionData.co2).toFixed(2));
+        state.totalPoints += missionData.points;
+
+        const newLog = {
+          id: Date.now(),
+          title: missionData.name,
+          sdg: missionData.sdg,
+          co2: missionData.co2,
+          points: missionData.points,
+          time: new Date().toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' }),
+          date: new Date().toLocaleDateString('ko-KR', { month: 'short', day: 'numeric' }),
+          image: state.selectedImage
+        };
+
+        state.logs.unshift(newLog);
+
+        updateDashboard();
+        renderLogs();
+        removeImage(e);
+        showToast(`🌱 ${missionData.name} 인증 완료! (${missionData.co2}kg CO₂ 감축)`);
+      }, 1400);
+    }
+
+    // AI Quiz Functions
+    function startAiQuiz() {
+      const loadingModal = document.getElementById('loadingModal');
+      document.getElementById('loadingTitle').innerText = 'AI 퀴즈 생성 중...';
+      document.getElementById('loadingDesc').innerText = 'SDGs 12 & 13 기반 기후 환경 문제와 해설을 생성하고 있습니다.';
+      loadingModal.classList.remove('hidden');
+
+      setTimeout(() => {
+        loadingModal.classList.add('hidden');
+        currentQuiz = quizPool[Math.floor(Math.random() * quizPool.length)];
+        
+        document.getElementById('quizQuestion').innerText = currentQuiz.q;
+        const optionsContainer = document.getElementById('quizOptions');
+        optionsContainer.innerHTML = '';
+
+        currentQuiz.options.forEach((opt, idx) => {
+          const btn = document.createElement('button');
+          btn.className = "w-full py-2.5 px-3 bg-slate-50 hover:bg-orange-50 border border-slate-200 hover:border-orange-300 rounded-xl text-left text-xs text-slate-700 font-medium transition flex items-center space-x-2";
+          btn.innerHTML = `<span class="w-5 h-5 rounded-full bg-slate-200 text-slate-600 font-bold flex items-center justify-center text-[10px]">${idx + 1}</span> <span>${opt}</span>`;
+          btn.onclick = () => answerQuiz(idx);
+          optionsContainer.appendChild(btn);
+        });
+
+        document.getElementById('quizModal').classList.remove('hidden');
+      }, 1000);
+    }
+
+    function answerQuiz(selectedIndex) {
+      closeQuizModal();
+      if (selectedIndex === currentQuiz.answer) {
+        state.totalPoints += 50;
+        updateDashboard();
+        showToast('🎉 정답입니다! 보너스 +50 에코 포인트를 획득하셨습니다.');
+      } else {
+        showToast('아쉽네요! 다음에 다시 도전해보세요 💡', 'error');
+      }
+    }
+
+    function closeQuizModal() {
+      document.getElementById('quizModal').classList.add('hidden');
+    }
+
+    function updateDashboard() {
+      document.getElementById('statCount').innerText = state.totalCount;
+      document.getElementById('statCo2').innerText = state.totalCo2.toFixed(2);
+      document.getElementById('statPoints').innerText = state.totalPoints;
+
+      const badgeName = document.getElementById('badgeName');
+      if (state.totalCount < 3) {
+        badgeName.innerText = '지구 가디언 Level 1';
+      } else if (state.totalCount < 7) {
+        badgeName.innerText = '기후 수호자 Level 2';
+      } else {
+        badgeName.innerText = 'SDGs 챔피언 Level 3';
+      }
+
+      saveState();
+    }
+
+    function renderLogs() {
+      const logList = document.getElementById('logList');
+      const emptyLog = document.getElementById('emptyLog');
+      const logCount = document.getElementById('logCount');
+
+      logCount.innerText = `총 ${state.logs.length}개`;
+
+      if (state.logs.length === 0) {
+        logList.innerHTML = '';
+        logList.appendChild(emptyLog);
+        return;
+      }
+
+      logList.innerHTML = '';
+      state.logs.forEach(log => {
+        const item = document.createElement('div');
+        item.className = "flex items-center justify-between p-3 bg-slate-50 rounded-xl border border-slate-200/80 hover:bg-slate-100 transition";
+        item.innerHTML = `
+          <div class="flex items-center space-x-3">
+            <img src="${log.image}" class="w-12 h-12 object-cover rounded-lg border border-slate-200 shadow-sm" alt="인증 사진" />
+            <div>
+              <div class="flex items-center space-x-1.5">
+                <span class="text-xs font-bold text-slate-800">${log.title}</span>
+                <span class="text-[9px] font-extrabold bg-emerald-100 text-emerald-700 px-1.5 py-0.5 rounded">${log.sdg}</span>
+              </div>
+              <p class="text-[11px] text-slate-400 mt-0.5">${log.date} ${log.time} • CO₂ ${log.co2}kg 감축</p>
+            </div>
+          </div>
+          <span class="text-xs font-extrabold text-emerald-700 bg-white px-2.5 py-1 rounded-full border border-slate-200 shadow-xs">
+            +${log.points}p
+          </span>
+        `;
+        logList.appendChild(item);
+      });
+    }
+
+    function showToast(message, type = 'success') {
+      const toast = document.getElementById('toast');
+      const toastMessage = document.getElementById('toastMessage');
+      const toastIcon = document.getElementById('toastIcon');
+
+      toastMessage.innerText = message;
+      if (type === 'error') {
+        toastIcon.className = 'fa-solid fa-circle-exclamation text-rose-400 text-lg';
+      } else {
+        toastIcon.className = 'fa-solid fa-circle-check text-emerald-400 text-lg';
+      }
+
+      toast.classList.remove('opacity-0', 'pointer-events-none', 'translate-y-4');
+      toast.classList.add('opacity-100', 'translate-y-0');
+
+      setTimeout(() => {
+        toast.classList.remove('opacity-100', 'translate-y-0');
+        toast.classList.add('opacity-0', 'pointer-events-none', 'translate-y-4');
+      }, 3000);
+    }
+
+    function saveState() {
+      localStorage.setItem('ecoHeroSdgState', JSON.stringify({
+        totalCount: state.totalCount,
+        totalCo2: state.totalCo2,
+        totalPoints: state.totalPoints,
+        logs: state.logs.slice(0, 10)
+      }));
+    }
+
+    function loadState() {
+      const saved = localStorage.getItem('ecoHeroSdgState');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        state.totalCount = parsed.totalCount || 0;
+        state.totalCo2 = parsed.totalCo2 || 0;
+        state.totalPoints = parsed.totalPoints || 0;
+        state.logs = parsed.logs || [];
+        updateDashboard();
+        renderLogs();
+      }
+    }
+
+    function resetData() {
+      if (confirm('기후 실천 기록을 초기화하시겠습니까?')) {
+        localStorage.removeItem('ecoHeroSdgState');
+        state = {
+          selectedImage: null,
+          logs: [],
+          totalCount: 0,
+          totalCo2: 0,
+          totalPoints: 0
+        };
+        updateDashboard();
+        renderLogs();
+        showToast('데이터가 정상적으로 초기화되었습니다.');
+      }
+    }
+
+    window.onload = function() {
+      loadState();
+    };
+  </script>
+</body>
+</html>
